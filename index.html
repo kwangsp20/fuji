@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no"
+  />
+
+  <title>AR Fuji Volcano</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+  <!-- AR.js -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.7/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    #ui {
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      right: 0;
+      bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    #status {
+      background: rgba(0, 0, 0, 0.65);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    #explodeBtn {
+      display: none;
+      pointer-events: auto;
+      border: none;
+      border-radius: 999px;
+      padding: 16px 28px;
+      font-size: 22px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #ff3d00, #ff9100);
+      box-shadow: 0 8px 20px rgba(255, 61, 0, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    #explodeBtn:active {
+      transform: scale(0.9);
+      box-shadow: 0 3px 10px rgba(255, 61, 0, 0.4);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="ui">
+    <div id="status">
+      📷 กรุณาส่องกล้องไปที่ Hiro Marker
+    </div>
+
+    <button id="explodeBtn">
+      💥 ระเบิด!
+    </button>
+  </div>
+
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    renderer="antialias: true; alpha: true"
+    arjs="
+      sourceType: webcam;
+      debugUIEnabled: false;
+      detectionMode: mono;
+      maxDetectionRate: 60;
+    "
+  >
+
+    <a-marker
+      id="hiroMarker"
+      preset="hiro"
+    >
+
+      <a-entity
+        id="fuji"
+        position="0 0 0"
+      >
+
+        <a-circle
+          position="0 0.015 0"
+          rotation="-90 0 0"
+          radius="0.8"
+          color="#000000"
+          material="
+            transparent: true;
+            opacity: 0.2;
+          "
+        ></a-circle>
+
+        <a-cone
+          position="0 0.55 0"
+          height="1.15"
+          radius-bottom="0.85"
+          radius-top="0.20"
+          segments-radial="32"
+          color="#3E8ED0"
+          material="
+            roughness: 0.8;
+            metalness: 0;
+          "
+        ></a-cone>
+
+        <a-cone
+          position="0 1.02 0"
+          height="0.43"
+          radius-bottom="0.40"
+          radius-top="0.12"
+          segments-radial="32"
+          color="#FFFFFF"
+        ></a-cone>
+
+        <a-torus
+          position="0 1.245 0"
+          rotation="90 0 0"
+          radius="0.13"
+          radius-tubular="0.035"
+          color="#582D1D"
+        ></a-torus>
+
+        <a-circle
+          position="0 1.235 0"
+          rotation="-90 0 0"
+          radius="0.105"
+          color="#FF3D00"
+          material="
+            emissive: #FF3D00;
+            emissiveIntensity: 1;
+          "
+        ></a-circle>
+
+        <a-sphere
+          position="-0.18 0.62 0.53"
+          radius="0.055"
+          color="#111111"
+        ></a-sphere>
+
+        <a-sphere
+          position="0.18 0.62 0.53"
+          radius="0.055"
+          color="#111111"
+        ></a-sphere>
+
+        <a-sphere
+          position="-0.195 0.64 0.575"
+          radius="0.018"
+          color="#FFFFFF"
+        ></a-sphere>
+
+        <a-sphere
+          position="0.165 0.64 0.575"
+          radius="0.018"
+          color="#FFFFFF"
+        ></a-sphere>
+
+        <a-circle
+          position="-0.31 0.49 0.50"
+          radius="0.07"
+          color="#FF8FA3"
+        ></a-circle>
+
+        <a-circle
+          position="0.31 0.49 0.50"
+          radius="0.07"
+          color="#FF8FA3"
+        ></a-circle>
+
+        <a-sphere
+          position="0 0.48 0.555"
+          scale="0.8 0.35 0.2"
+          radius="0.08"
+          color="#3B1F1F"
+        ></a-sphere>
+
+        <a-entity
+          id="particles"
+          position="0 0 0"
+        ></a-entity>
+
+      </a-entity>
+
+    </a-marker>
+
+    <a-entity camera></a-entity>
+
+  </a-scene>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const marker = document.querySelector("#hiroMarker");
+      const fuji = document.querySelector("#fuji");
+      const particlesContainer = document.querySelector("#particles");
+      const explodeBtn = document.querySelector("#explodeBtn");
+      const status = document.querySelector("#status");
+
+      marker.addEventListener("markerFound", () => {
+        status.innerHTML = "🗻 พบภูเขาไฟฟูจิแล้ว!";
+        explodeBtn.style.display = "block";
+      });
+
+      marker.addEventListener("markerLost", () => {
+        status.innerHTML = "📷 กรุณาส่องกล้องไปที่ Hiro Marker";
+        explodeBtn.style.display = "none";
+      });
+
+      explodeBtn.addEventListener("click", () => {
+        explodeVolcano();
+      });
+
+      function explodeVolcano() {
+        particlesContainer.innerHTML = "";
+
+        fuji.setAttribute(
+          "animation__shake",
+          "property: rotation; from: 0 0 -5; to: 0 0 5; dur: 80; dir: alternate; loop: 8; easing: linear"
+        );
+
+        fuji.setAttribute(
+          "animation__boom",
+          "property: scale; from: 1 1 1; to: 1.12 1.12 1.12; dur: 130; dir: alternate; loop: 3"
+        );
+
+        const colors = [
+          "#FF2400",
+          "#FF4500",
+          "#FF6D00",
+          "#FF9100",
+          "#FFC400",
+          "#FFFF00"
+        ];
+
+        for (let i = 0; i < 35; i++) {
+          createParticle(colors);
+        }
+
+        createExplosionBall();
+
+        setTimeout(() => {
+          fuji.removeAttribute("animation__shake");
+          fuji.removeAttribute("animation__boom");
+          fuji.setAttribute("rotation", "0 0 0");
+          fuji.setAttribute("scale", "1 1 1");
+        }, 1000);
+      }
+
+      function createParticle(colors) {
+        const particle = document.createElement("a-sphere");
+        const size = 0.025 + Math.random() * 0.06;
+
+        particle.setAttribute("radius", size);
+
+        const color =
+          colors[Math.floor(Math.random() * colors.length)];
+
+        particle.setAttribute("color", color);
+        particle.setAttribute(
+          "material",
+          `emissive: ${color}; emissiveIntensity: 1;`
+        );
+
+        particle.setAttribute(
+          "position",
+          `${random(-0.08, 0.08)} ${random(1.20, 1.30)} ${random(-0.08, 0.08)}`
+        );
+
+        particlesContainer.appendChild(particle);
+
+        const velocity = {
+          x: random(-0.015, 0.015),
+          y: random(0.025, 0.055),
+          z: random(-0.015, 0.015)
+        };
+
+        const gravity = 0.0012;
+        let life = 0;
+        const maxLife = 70 + Math.random() * 60;
+
+        function animate() {
+          if (!particle.parentNode) return;
+
+          const position = particle.object3D.position;
+
+          position.x += velocity.x;
+          position.y += velocity.y;
+          position.z += velocity.z;
+
+          velocity.y -= gravity;
+          velocity.x *= 0.995;
+          velocity.z *= 0.995;
+
+          life++;
+
+          if (life > maxLife * 0.7) {
+            const scale = Math.max(
+              0,
+              1 -
+                (life - maxLife * 0.7) /
+                (maxLife * 0.3)
+            );
+
+            particle.object3D.scale.set(scale, scale, scale);
+          }
+
+          if (life < maxLife) {
+            requestAnimationFrame(animate);
+          } else {
+            particle.remove();
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      function createExplosionBall() {
+        const explosion = document.createElement("a-sphere");
+
+        explosion.setAttribute("position", "0 1.32 0");
+        explosion.setAttribute("radius", "0.18");
+        explosion.setAttribute("color", "#FF6D00");
+
+        explosion.setAttribute(
+          "material",
+          "transparent: true; opacity: 0.9; emissive: #FF3D00; emissiveIntensity: 1;"
+        );
+
+        explosion.setAttribute(
+          "animation__scale",
+          "property: scale; from: 0.2 0.2 0.2; to: 3 3 3; dur: 500; easing: easeOutQuad"
+        );
+
+        explosion.setAttribute(
+          "animation__fade",
+          "property: material.opacity; from: 0.9; to: 0; dur: 500; easing: linear"
+        );
+
+        particlesContainer.appendChild(explosion);
+
+        setTimeout(() => {
+          explosion.remove();
+        }, 550);
+      }
+
+      function random(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+    });
+  </script>
+
+</body>
+</html>
